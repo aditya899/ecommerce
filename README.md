@@ -37,6 +37,7 @@
         "stock": 2
     }
 ]
+```
 
 ## POST Request to Create a New Product
 
@@ -58,3 +59,4 @@
     "price": "200.00",
     "stock": 2
 }
+```
