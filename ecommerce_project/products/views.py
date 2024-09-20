@@ -1,46 +1,42 @@
 # products/views.py
-from rest_framework import viewsets
+from django.shortcuts import render
+from django.shortcuts import render
 from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from rest_framework import status
 from .models import Product
 from .serializers import ProductSerializer
-from rest_framework.views import APIView
 
 
-class ProductViewSet(APIView):
-    serializer_class = ProductSerializer
+# class ProductViewSet(APIView):
+#     serializer_class = ProductSerializer
 
-    # List all products
-    def get_list(self, request):
-        queryset = Product.objects.all()
-        serializer = ProductSerializer(queryset, many=True)
+# List all products
+@api_view(['GET'])
+def get_list(request):
+    app = Product.objects.all()
+    serializer = ProductSerializer(app, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def post_product(request):
+    serializer = ProductSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+def update_product(request, id):
+    product = Product.objects.get(pk=id)
+    serializer = ProductSerializer(product, data=request.data)
+    if serializer.is_valid():
+        serializer.save()
         return Response(serializer.data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # Create a new product
-    def create_product(self, request):
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # Retrieve a specific product
-    def retrieve_by_id(self, request, pk=None):
-        queryset = Product.objects.filter(pk=pk)
-        serializer = ProductSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    # Update a specific product
-    def update_by_id(self, request, pk=None):
-        product = Product.objects.filter(pk=pk)
-        serializer = ProductSerializer(product, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    # Delete a specific product
-    def destroy_by_id(self, request, pk=None):
-        product = Product.objects.filter(pk=pk)
-        product.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+@api_view(['DELETE'])
+def delete_product(request, id):
+    product = Product.objects.get(pk=id)
+    product.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
